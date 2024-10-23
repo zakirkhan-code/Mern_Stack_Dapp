@@ -4,7 +4,7 @@
   "description": "This is a report of API.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon server.ts"
   },
   "author": "ZakiKhan",
   "license": "ISC",
