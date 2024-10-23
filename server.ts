@@ -1,7 +1,9 @@
 import { config } from "./config/config";
+import connectDB from "./config/db";
 import app from "./src/app"
 
-const start=()=>{
+const startServer=async ()=>{
+    await connectDB()
 
     const PORT = config.port || 3000;
 
@@ -10,4 +12,4 @@ const start=()=>{
     })
 }
 
-start()
+startServer()
