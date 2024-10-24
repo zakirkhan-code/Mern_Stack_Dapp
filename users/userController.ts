@@ -46,7 +46,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
             algorithm: 'HS384',
         });
 
-        res.json({ accessToken: token });
+        res.status(201).json({ accessToken: token });
     } catch (error) {
         console.log(error);
         return next(createHttpError(500, "Error occurred while generating the token"));
