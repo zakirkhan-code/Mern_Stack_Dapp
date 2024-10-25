@@ -3,9 +3,9 @@ import { config } from "./config";
 
 
 cloudinary.config({
-    name_cloud:config.cloud_name,
-    key_api : config.api_key,
-    secret_api: config.api_secret,
+    cloud_name :config.cloudinary_cloud_name,
+    api_key : config.cloudinary_api_key,
+    api_secret : config.cloudinary_api_secret,
 });
 
 export default cloudinary
