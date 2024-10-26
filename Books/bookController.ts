@@ -135,4 +135,30 @@ const GetBooks = async (req:Request,res:Response,next:NextFunction)=>{
     }
 }
 
-export { createBook , UpdateBook , GetBooks};
+const GetSingleBook = async (req:Request,res:Response,next:NextFunction)=>{
+    const bookId = req.params.bookId;
+    try {
+        const book = await bookModal.findOne({_id:bookId})
+        if(!book)
+        {
+            return next(createHttpError(401,"Book is not found"))
+        }
+        res.json({book})
+    } catch (error) {
+        console.log(error);
+        return next(createHttpError(500,"Error while getting book"))
+    }
+}
+
+const DeleteBook = async (req:Request,res:Response,next:NextFunction)=>{
+
+    const bookId = req.params.bookId;
+    const book = await bookModal.findOne({_id:bookId})
+    if(!book)
+    {
+        return next(createHttpError(404,"Book cannot Be found"))
+    }
+    
+}
+
+export { createBook , UpdateBook , GetBooks , GetSingleBook , DeleteBook};

@@ -1,8 +1,9 @@
 import express from "express"
-import { createBook, GetBooks, UpdateBook } from "./bookController";
+import { createBook, DeleteBook, GetBooks, GetSingleBook, UpdateBook } from "./bookController";
 import multer from "multer";
 import path from "path";
 import authorization from "../middlewares/authorization";
+import bookModal from "./bookModal";
 
 
 const BookRouter = express.Router()
@@ -23,6 +24,10 @@ BookRouter.patch('/:bookId',authorization,upload.fields([
 ]),UpdateBook)
 
 BookRouter.get('/',GetBooks)
+
+BookRouter.get('/:bookId',GetSingleBook)
+
+BookRouter.delete('/:bookId',authorization,DeleteBook)
 
 
 export default BookRouter;
