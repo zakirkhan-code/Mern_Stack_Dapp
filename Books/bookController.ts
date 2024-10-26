@@ -59,69 +59,84 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 
-const UpdateBook = async (req: Request, res: Response, next: NextFunction)=>{
-    const {title,genre} = req.body;
+const UpdateBook = async (req: Request, res: Response, next: NextFunction) => {
+    const { title, genre } = req.body;
     const bookId = req.params.bookId;
 
-    const book = await bookModal.findOne({_id:bookId})
-    if(!book)
-    {
-        return next(createHttpError(404,"Book not found"))
+    const book = await bookModal.findOne({ _id: bookId });
+    if (!book) {
+        return next(createHttpError(404, "Book not found"));
     }
     const _req = req as AuthRequest;
-    if(book.author.toString()!==_req.userId)
-    {
-        return next(createHttpError(404,"You cannot update this Book"))
+    if (book.author.toString() !== _req.userId) {
+        return next(createHttpError(404, "You cannot update this Book"));
     }
-    const files = req.files as {[fieldname:string]:Express.Multer.File[]}
 
-    let completeCoverImage= "";
-    if(files.coverImage)
-    {
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+    let completeCoverImage = "";
+    let completeFile = "";
+
+    // For cover image
+    if (files.coverImage) {
+        // Delete old cover image from Cloudinary
+        const oldCoverImagePublicId = book.coverImage.split('/').pop()?.split('.')[0]; // Extract the public ID
+        if (oldCoverImagePublicId) {
+            await cloudinary.uploader.destroy(`Book-covers/${oldCoverImagePublicId}`);
+        }
+
         const filename = files.coverImage[0].filename;
         const coverMimetype = files.coverImage[0].mimetype.split('/').at(-1);
-        const filePath = path.resolve(__dirname,'../../public/data/uploads',filename);
-        completeCoverImage = `${filename}.${coverMimetype}`
-        completeCoverImage=filename;
-        const uploadResult = await cloudinary.uploader.upload(filePath,{
-            filename_override:completeCoverImage,
-            folder:"Book-covers",
-            format:coverMimetype,
+        const filePath = path.resolve(__dirname, '../../public/data/uploads', filename);
+        completeCoverImage = `${filename}.${coverMimetype}`;
+        const uploadResult = await cloudinary.uploader.upload(filePath, {
+            filename_override: completeCoverImage,
+            folder: "Book-covers",
+            format: coverMimetype,
         });
 
         completeCoverImage = uploadResult.secure_url;
-        await fs.promises.unlink(filePath)
+        await fs.promises.unlink(filePath);
     }
 
-    if(files.file)
-        {
-            const bookName = files.file[0].filename;
-            const filePath = path.resolve(__dirname,'../../public/data/uploads',bookName);
-            completeCoverImage = `${bookName}`
-            completeCoverImage=bookName;
-            const uploadBook = await cloudinary.uploader.upload(filePath,{
-                resource_type:'raw',
-                filename_override:completeCoverImage,
-                folder:"Book-Pdf",
-                format:'pdf',
-            });
-    
-            completeCoverImage = uploadBook.secure_url;
-            await fs.promises.unlink(filePath)
+    // For book file
+    if (files.file) {
+        // Delete old file from Cloudinary
+        const oldFilePublicId = book.file.split('/').pop()?.split('.')[0]; // Extract the public ID
+        if (oldFilePublicId) {
+            await cloudinary.uploader.destroy(`Book-Pdf/${oldFilePublicId}`, { resource_type: 'raw' });
         }
 
-        const updateBook = await bookModal.findOneAndUpdate({_id:bookId,},{
-            title:title,
-            genre:genre,
-            coverImage:completeCoverImage?completeCoverImage:book.coverImage,
-            file:completeCoverImage?completeCoverImage:book.file,
-        },
-    {
-        new:true
-    });
+        const bookName = files.file[0].filename;
+        const filePath = path.resolve(__dirname, '../../public/data/uploads', bookName);
+        completeFile = `${bookName}`;
+        const uploadBook = await cloudinary.uploader.upload(filePath, {
+            resource_type: 'raw',
+            filename_override: completeFile,
+            folder: "Book-Pdf",
+            format: 'pdf',
+        });
 
-    res.json({updateBook})
-}
+        completeFile = uploadBook.secure_url;
+        await fs.promises.unlink(filePath);
+    }
+
+    // Update the book with new values or keep old ones if not updated
+    const updateBook = await bookModal.findOneAndUpdate(
+        { _id: bookId },
+        {
+            title: title,
+            genre: genre,
+            coverImage: completeCoverImage ? completeCoverImage : book.coverImage,
+            file: completeFile ? completeFile : book.file,
+        },
+        {
+            new: true,
+        }
+    );
+
+    res.json({ updateBook });
+};
 
 const GetBooks = async (req:Request,res:Response,next:NextFunction)=>{
     try {
