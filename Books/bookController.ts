@@ -123,4 +123,16 @@ const UpdateBook = async (req: Request, res: Response, next: NextFunction)=>{
     res.json({updateBook})
 }
 
-export { createBook , UpdateBook };
+const GetBooks = async (req:Request,res:Response,next:NextFunction)=>{
+    try {
+        const book = await bookModal.find()
+
+        res.json(book)
+    } catch (error) {
+        console.log(error);
+        
+        return next(createHttpError(500,"Error while getting a book"))
+    }
+}
+
+export { createBook , UpdateBook , GetBooks};

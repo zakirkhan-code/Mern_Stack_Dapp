@@ -1,5 +1,5 @@
 import express from "express"
-import { createBook, UpdateBook } from "./bookController";
+import { createBook, GetBooks, UpdateBook } from "./bookController";
 import multer from "multer";
 import path from "path";
 import authorization from "../middlewares/authorization";
@@ -22,6 +22,7 @@ BookRouter.patch('/:bookId',authorization,upload.fields([
     {name:"file",maxCount:1}
 ]),UpdateBook)
 
+BookRouter.get('/',GetBooks)
 
 
 export default BookRouter;
