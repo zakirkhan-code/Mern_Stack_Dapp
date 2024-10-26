@@ -158,7 +158,27 @@ const DeleteBook = async (req:Request,res:Response,next:NextFunction)=>{
     {
         return next(createHttpError(404,"Book cannot Be found"))
     }
-    
+
+    const _req = req as AuthRequest;
+    if(book.author.toString()!==_req.userId)
+    {
+        return next(createHttpError(404,"You cannot Delete this Book"))
+    }
+
+    const coverImageSplits = book.coverImage.split('/');
+    const coverImagePublicId = coverImageSplits.at(-2) + "/" + coverImageSplits.at(-1)?.split('.').at(-2);
+
+    const bookFileSplits = book.file.split('/');
+    const BookFilePublicId = bookFileSplits.at(-2) + '/' + bookFileSplits.at(-1);
+
+    await cloudinary.uploader.destroy(coverImagePublicId);
+    await cloudinary.uploader.destroy(BookFilePublicId,{
+        resource_type:'raw',
+    });
+
+    await bookModal.deleteOne({_id:bookId})
+
+    res.status(200).json({ message: "Book deleted successfully" });
 }
 
 export { createBook , UpdateBook , GetBooks , GetSingleBook , DeleteBook};

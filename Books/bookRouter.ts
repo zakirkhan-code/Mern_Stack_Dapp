@@ -3,7 +3,6 @@ import { createBook, DeleteBook, GetBooks, GetSingleBook, UpdateBook } from "./b
 import multer from "multer";
 import path from "path";
 import authorization from "../middlewares/authorization";
-import bookModal from "./bookModal";
 
 
 const BookRouter = express.Router()
